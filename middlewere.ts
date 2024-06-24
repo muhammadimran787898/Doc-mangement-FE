@@ -1,41 +1,72 @@
-// import React from "react";
 // import { NextResponse } from "next/server";
+// import type { NextRequest } from "next/server";
+// import { cookies } from "next/headers";
 
-// export default function middlewere({ req }: any) {
-//   const user = "";
+// // List of public routes that do not require authentication
+// const publicRoutes = ["/login", "/register", "/register"];
 
-//   if (!user) {
-//     return NextResponse.redirect("/login");
+// export function middleware(request: NextRequest) {
+//   const { pathname } = request.nextUrl;
+
+//   // Retrieve cookies from the request
+//   const requestCookies = cookies();
+//   const token = requestCookies.get("token");
+
+//   // If the request is for a public route, allow it
+//   if (publicRoutes.includes(pathname)) {
+//     return NextResponse.next();
 //   }
 
+//   // If the token is not present and the user is trying to access a protected route, redirect to login
+//   if (!token) {
+//     const loginUrl = new URL("/login", request.url);
+//     return NextResponse.redirect(loginUrl);
+//   }
+
+//   // If the token is present, allow the request
 //   return NextResponse.next();
 // }
 
+// export const config = {
+//   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+// };
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { cookies } from "next/headers";
+
+// List of public routes that do not require authentication
+const publicRoutes = ["/login", "/register", "/forgotpassword"];
 
 export function middleware(request: NextRequest) {
-  // Clone the request headers and set a new header `x-hello-from-middleware1`
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-hello-from-middleware1", "hello");
+  const { pathname } = request.nextUrl;
 
-  // You can also set request headers in NextResponse.rewrite
-  const response = NextResponse.next({
-    request: {
-      // New request headers
-      headers: requestHeaders,
-    },
-  });
+  // Retrieve cookies from the request
+  const requestCookies = cookies();
+  const token = requestCookies.get("token");
 
-  // Set a new response header `x-hello-from-middleware2`
-  response.headers.set("x-hello-from-middleware2", "hello");
-  return response;
+  // Debugging: Check the current path and token
+  console.log("Request path:", pathname);
+  console.log("Token:", token);
+
+  // If the request is for a public route, allow it
+  if (publicRoutes.includes(pathname)) {
+    console.log("Accessing public route:", pathname);
+    return NextResponse.next();
+  }
+
+  // If the token is not present and the user is trying to access a protected route, redirect to login
+  if (!token) {
+    const loginUrl = new URL("/login", request.url);
+    console.log("No token found. Redirecting to:", loginUrl.href);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // If the token is present, allow the request
+  console.log("Token found. Allowing access to:", pathname);
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/profile/:path*", // Protect profile route
-    "/dashboard/:path*", // Protect dashboard route
-    "/settings/:path*", // Example of another protected route
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

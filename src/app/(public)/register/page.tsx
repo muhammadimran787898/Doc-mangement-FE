@@ -1,7 +1,31 @@
+"use client";
 import Image from "next/image";
 import React from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { Toast } from "@/app/utils/Toast";
 
-export default function register() {
+interface Registerform {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export default function Register() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Registerform>();
+
+  const router = useRouter();
+  const onSubmit = async (data: any) => {
+    await axios.post("http://localhost:5000/api/v1/auth/register", data);
+    Toast.success("User Registered", "Success");
+    router.push("/login");
+  };
+
   return (
     <div>
       <>
@@ -15,7 +39,7 @@ export default function register() {
               height="100"
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Sign in to your account
+              Create your account
             </h2>
             {/* <p className="mt-2 text-center text-sm text-gray-600">
               Or{" "}
@@ -30,24 +54,35 @@ export default function register() {
 
           <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div>
                   <label
                     htmlFor="name"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Name
-                
                   </label>
                   <div className="mt-1">
                     <input
                       id="name"
-                      name="name"
                       type="name"
                       autoComplete="name"
-                      required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className={`
+                        ${errors.name ? "border-red-500" : "border-gray-300"}
+                        appearance-none block w-full px-3 py-2 border  rounded-md shadow-sm placeholder-gray-400 focus:outline-none   sm:text-sm`}
+                      {...register("name", {
+                        required: "name is required",
+                        maxLength: {
+                          value: 30,
+                          message: "Name cannot exceed 30 characters",
+                        },
+                      })}
                     />
+                    {errors.name && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.name.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -61,12 +96,24 @@ export default function register() {
                   <div className="mt-1">
                     <input
                       id="email"
-                      name="email"
                       type="email"
-                      autoComplete="email"
-                      required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      {...register("email", {
+                        required: "email is required",
+
+                        pattern: {
+                          value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
+                          message: "Invalid email address",
+                        },
+                      })}
+                      className={` ${
+                        errors.email ? "border-red-500" : "border-gray-300"
+                      } appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm`}
                     />
+                    {errors.email && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.email.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -80,12 +127,26 @@ export default function register() {
                   <div className="mt-1">
                     <input
                       id="password"
-                      name="password"
                       type="password"
-                      autoComplete="current-password"
-                      required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className={`
+                        ${
+                          errors.password ? "border-red-500" : "border-gray-300"
+                        }
+                        appearance-none block w-full px-3 py-2 border  rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                      {...register("password", {
+                        required: "password is required",
+                        maxLength: {
+                          value: 30,
+                          message:
+                            "Password ust contain special charceters alohabet and digt",
+                        },
+                      })}
                     />
+                    {errors.password && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.password.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
