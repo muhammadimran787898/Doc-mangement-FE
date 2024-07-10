@@ -26,8 +26,8 @@ export default function Resetpassword({ id }: { id: any }) {
     console.log(data);
 
     const sendData = async () => {
-      const response = await axios
-        .post("http://localhost:5000/api/v1/auth/resetpassword", {
+      await axios
+        .post("http://localhost:5000/api/v1/user/resetpassword", {
           id,
           ...data.password,
         })
